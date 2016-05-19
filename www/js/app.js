@@ -28,13 +28,31 @@ app.config(function ($stateProvider, $urlRouterProvider) {
         .state('index', {
             url: '/',
             templateUrl: 'templates/login.html',
+            controller: 'MainCtrl'
         })
         .state('home', {
             url: '/home',
             templateUrl: 'templates/home.html',
+            controller: 'MainCtrl'
         });
     $urlRouterProvider.otherwise('/');
+
 });
+
+app.controller('MainCtrl', ['$http',
+
+    function ($http) {
+        var self = this;
+        this.backendUrl = "http://www.bookstore.backend.boom/index.php/book/rest/";
+        self.books = [];
+        $http.get(self.backendUrl + 'all').then(function (response) {
+            self.books = response.data;
+            console.log(self.items);
+        }, function (errResponse) {
+            console.error("Can't fetch ".self.backendUrl);
+        });
+    }
+]);
 
 function ContentController($scope, $ionicSideMenuDelegate) {
     $scope.toggleLeft = function () {
