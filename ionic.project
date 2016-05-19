@@ -1,0 +1,12 @@
+{
+  "name": "myBooks",
+  "app_id": "afebbfe6",
+  "gulpStartupTasks": [
+    "sass",
+    "watch"
+  ],
+  "watchPatterns": [
+    "www/**/*",
+    "!www/lib/**/*"
+  ]
+}
