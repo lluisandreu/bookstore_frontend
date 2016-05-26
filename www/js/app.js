@@ -28,7 +28,7 @@ app.config(function ($stateProvider, $urlRouterProvider) {
         .state('index', {
             url: '/',
             templateUrl: 'templates/login.html',
-            controller: 'MainCtrl'
+            controller: 'LoginCtrl'
         })
         .state('home', {
             url: '/home',
@@ -39,20 +39,40 @@ app.config(function ($stateProvider, $urlRouterProvider) {
 
 });
 
-app.controller('MainCtrl', ['$http',
+app.controller('MainCtrl',
 
-    function ($http) {
-        var self = this;
-        this.backendUrl = "http://www.bookstore.backend.boom/index.php/book/rest/";
-        self.books = [];
-        $http.get(self.backendUrl + 'all').then(function (response) {
-            self.books = response.data;
-            console.log(self.items);
+    function ($http, $scope) {
+        var backendUrl = "http://www.bookstore.backend.boom/index.php/book/rest/";
+        $scope.books = [];
+        $http.get(backendUrl + 'all').then(function (response) {
+            $scope.books = response.data;
+            console.log(response.data);
         }, function (errResponse) {
-            console.error("Can't fetch ".self.backendUrl);
+            console.error("Can't fetch ".backendUrl);
         });
     }
-]);
+);
+
+app.controller('LoginCtrl',
+
+    function ($scope, $http, $state) {
+        var loginUrl = "http://multimedia.uoc.edu/frontend/auth.php";
+        $scope.user = {};
+        $scope.login = function (data) {
+            $scope.user.user = data.user;
+            $scope.user.passwd = data.passwd;
+            $http.post(loginUrl, $scope.user).then(
+                function (resp) {
+                    console.log(resp.data);
+                    $scope.status = resp.data.status;
+                    if ($scope.status == 'KO') {
+                        $state.go("home");
+                    }
+                });
+            console.log($scope.user);
+        }
+    }
+)
 
 function ContentController($scope, $ionicSideMenuDelegate) {
     $scope.toggleLeft = function () {

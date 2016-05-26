@@ -4,12 +4,12 @@
 	<p>Please login to continue</p>
 	<div class="list list-inset">
 		<label class="item item-input item-floating-label">
-			<input type="text" placeholder="Username">
+			<input type="text" ng-model="data.user" placeholder="Username">
 		</label>
 		<label class="item item-input item-floating-label">
-			<input type="text" placeholder="Your password">
+			<input type="password" ng-model="data.passwd" placeholder="Your password">
 		</label>
-		<button class="button button-block button-balanced">Submit</button>
+		<button type="submit" ng-click="login(data)" class="button button-block button-balanced">Submit</button>
 	</div>
 	</ion-content>
 </ion-view>
