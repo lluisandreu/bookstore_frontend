@@ -12,8 +12,22 @@
 			<main class="content has-header padding">
 				<div class="card">
 				  <div class="item item-text-wrap">
-				   <h2>Welcome back %Name</h2>
+				   <h2>Welcome back {{ user }}!</h2>
 				  </div>
+				</div>
+				<div class="list card">
+				  <a href="#/books" class="item item-icon-left">
+				    <i class="icon ion-ios-book-outline"></i>
+				    Books list
+				  </a>
+				  <a href="#/order" class="item item-icon-left">
+				    <i class="icon ion-ios-cart-outline"></i>
+				    My order
+				  </a>
+				  <a href="#" ng-click="logout()" class="item item-icon-left">
+				    <i class="icon ion-ios-upload-outline"></i>
+				    Logout
+				  </a>
 				</div>
 			</main>
 		</ion-content>

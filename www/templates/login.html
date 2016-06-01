@@ -1,15 +1,20 @@
-<ion-view view-title="Login">
-	<ion-content padding="true">
+<ion-view view-title="Login" hide-nav-bar="true"> 
+	<ion-content class="padding padding-extra">
 	<h1>Welcome to myBooks</h1>
 	<p>Please login to continue</p>
-	<div class="list list-inset">
-		<label class="item item-input item-floating-label">
-			<input type="text" ng-model="data.user" placeholder="Username">
-		</label>
-		<label class="item item-input item-floating-label">
-			<input type="password" ng-model="data.passwd" placeholder="Your password">
-		</label>
-		<button type="submit" ng-click="login(data)" class="button button-block button-balanced">Submit</button>
-	</div>
+	<form name="loginForm">
+		<div class="alerts">
+			<p ng-bind="message.login" class="assertive"></p>
+		</div>
+		<div class="list list-inset">
+			<label class="item item-input item-floating-label">
+				<input type="text" ng-model="data.user" placeholder="Username" required>
+			</label>
+			<label class="item item-input item-floating-label">
+				<input type="password" ng-model="data.passwd" placeholder="Your password" required>
+			</label>
+			<button type="submit" ng-click="login(data)" class="button button-block button-balanced" ng-disabled="loginForm.$invalid">Submit</button>
+		</div>
+	</form>
 	</ion-content>
 </ion-view>

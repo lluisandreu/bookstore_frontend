@@ -9814,3 +9814,17 @@ a.button {
   opacity: 0;
   -webkit-transition-duration: 0s;
   transition-duration: 0s; }
+
+.price .inner {
+  padding: 1em;
+  font-size: 16px;
+  border-radius: 100px;
+  background: #ef473a;
+  color: #fff;
+  display: inline-block; }
+
+.padding-extra {
+  padding: 2em 1.5em; }
+
+.align-right {
+  text-align: right; }

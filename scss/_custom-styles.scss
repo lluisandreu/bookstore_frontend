@@ -1,0 +1,20 @@
+// Custom styles for MyBooks
+
+.price .inner {
+    padding: 1em;
+    font-size: 16px;
+    border-radius: 100px;
+    background: $assertive;
+    color: #fff;
+    display: inline-block;
+}
+
+// Utility
+
+.padding-extra {
+    padding: 2em 1.5em;
+}
+
+.align-right {
+    text-align: right;
+}
