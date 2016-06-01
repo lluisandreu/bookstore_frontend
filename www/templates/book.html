@@ -10,6 +10,9 @@
   				<h1 class="title">About this book</h1>
 			</div>
 			<main class="content has-header padding">
+			<div class="alerts">
+				<p ng-bind="message.cart" class="balanced"></p>
+			</div>
 			<div ng-repeat="book in books" class="list card">
 
 			  <div class="item">
@@ -25,8 +28,20 @@
 			  </div>
 
 			  <div class="item item-body">
-			    <img class="full-image" src="{{ book.cover }}">
-			    <a ng-click="addToCard(book.id)" class="button button-outline icon-left ion-ios-cart-outline button-balanced">Add to the cart</a>
+			    <div class="list">
+				  <label class="item-input item-select">
+				    <div class="input-label">Quantity</div>
+				    <select ng-model="quantity" ng-init="quantity='1'">
+				      <option value="1" selected>1</option>
+				      <option value="2">2</option>
+				      <option value="3">3</option>
+				      <option value="4">4</option>
+				      <option value="5">5</option>
+				      <option value="6">6</option>
+				    </select>
+				  </label>
+				</div>
+			    <a ng-click="addToCard(book.id, quantity)" class="button button-outline icon-left ion-ios-cart-outline button-balanced">Add to the cart</a>
 			    <div ng-bind-html="book.review"></div>
 			    <br>
 			    <div class="book-isbn"><span>ISBN: </span> {{ book.ISBN }}</div>

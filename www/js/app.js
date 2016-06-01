@@ -44,9 +44,20 @@ app.config(function ($stateProvider, $urlRouterProvider) {
             url: '/book/:bookId',
             templateUrl: 'templates/book.html',
             controller: 'BookCtrl'
+        })
+        .state('order', {
+            url: '/order',
+            templateUrl: 'templates/order.html',
+            controller: 'OrderCtrl'
         });
     $urlRouterProvider.otherwise('/');
 
+});
+
+app.service('backendUrl', function () {
+    this.url = function () {
+        return "http://eimtcms.uoc.edu/~lluisandreu/mybooks_backend/public_html/index.php/book/rest/";
+    }
 });
 
 app.controller('LoginCtrl',
@@ -61,6 +72,7 @@ app.controller('LoginCtrl',
             $scope.message = {};
             $scope.user = {};
             var cart = [];
+            var order = [];
             $scope.login = function (data) {
                 var userLowercase = data.user.toLowerCase();
                 $scope.user = $.param({
@@ -80,6 +92,7 @@ app.controller('LoginCtrl',
                             webStorage.set('username', data.user);
                             webStorage.set('login', 'logged');
                             webStorage.set('cart', cart);
+                            webStorage.set('order', order);
                             $state.go("home");
                         } else {
                             $scope.message.login = "Your login failed. Please try again";
@@ -95,8 +108,8 @@ app.controller('LoginCtrl',
 
 app.controller('MainCtrl',
 
-    function ($ionicSideMenuDelegate, $http, $scope, webStorage) {
-        var backendUrl = "http://eimtcms.uoc.edu/~lluisandreu/mybooks_backend/public_html/index.php/book/rest/";
+    function ($ionicSideMenuDelegate, $http, $scope, webStorage, backendUrl) {
+        var backendUrl = backendUrl.url();
         $ionicSideMenuDelegate.canDragContent(true);
         $scope.books = {};
         $scope.user = webStorage.get('username');
@@ -114,27 +127,88 @@ app.controller('MainCtrl',
 
 app.controller('BookCtrl',
 
-    function ($ionicSideMenuDelegate, $stateParams, $http, $scope, webStorage) {
+    function ($ionicSideMenuDelegate, $stateParams, $http, $scope, webStorage, backendUrl) {
         $ionicSideMenuDelegate.canDragContent(true);
-        var backendUrl = "http://eimtcms.uoc.edu/~lluisandreu/mybooks_backend/public_html/index.php/book/rest/";
+        var backendUrl = backendUrl.url();
         var bookId = $stateParams.bookId;
+        $scope.message = {};
         $http.get(backendUrl + bookId).then(function (response) {
             $scope.books = response.data;
             console.log($scope.books);
         }, function (errResponse) {
             console.error("Can't fetch ".backendUrl);
         });
-        $scope.addToCard = function (id) {
+        $scope.addToCard = function (id, quantity) {
+            var lineItem = {
+                id, quantity
+            };
             var order = webStorage.get('cart');
-            order.push(id);
+            order.push(lineItem);
             webStorage.set('cart', order);
+            $scope.message.cart = "This book was added to your cart";
         }
         console.log(webStorage.get('cart'));
     }
 );
 
+app.controller('OrderCtrl',
 
+    function (backendUrl, $ionicSideMenuDelegate, $stateParams, $http, $scope, $ionicPopup, webStorage) {
+        $ionicSideMenuDelegate.canDragContent(true);
+        var backendUrl = backendUrl.url();
+        $scope.cart = webStorage.get('cart');
+        $scope.lineItems = [];
+        $scope.orderTotal = 0;
+        angular.forEach($scope.cart, function (element, index) {
+            $http.get(backendUrl + element.id).then(function (response) {
+                $scope.lineItems[index] = response.data[0];
+                $scope.lineItems[index].quantity = element.quantity;
+                $scope.orderTotal += parseFloat($scope.lineItems[index].price, 10) * parseFloat(element.quantity);
+                webStorage.set('order', $scope.orderTotal);
+            }, function (errResponse) {
+                console.error("Can't fetch ".backendUrl);
+            });
+        });
+        $scope.removeLineItem = function (id) {
+            // Remove from webstorage
+            var cart = webStorage.get('cart');
+            var index = cart.indexOf(id);
+            cart.splice(index, 1);
+            webStorage.set('cart', cart);
 
+            // Remove from view
+            var indexTwo = $scope.lineItems.indexOf(id);
+            $scope.lineItems.splice(indexTwo, 1);
+        }
+        $scope.showPopup = function (id) {
+            $scope.data = {};
+
+            // An elaborate, custom popup
+            var changeQuantity = $ionicPopup.show({
+                template: '<input type="number" ng-model="changeQuantity">',
+                title: 'Change your item quantity',
+                scope: $scope,
+                buttons: [{
+                    text: 'Cancel'
+                }, {
+                    text: '<b>Save</b>',
+                    type: 'button-positive',
+                    onTap: function (e) {
+                        if (!$scope.changeQuantity) {
+                            //don't allow the user to close unless he enters wifi password
+                            e.preventDefault();
+                        } else {
+                            return $scope.changeQuantity;
+                        }
+                    }
+                }]
+            });
+            changeQuantity.then(function (res) {
+                console.log(res);
+            });
+        };
+    }
+);
 
 function ContentController($scope, $ionicSideMenuDelegate) {
     $scope.toggleLeft = function () {

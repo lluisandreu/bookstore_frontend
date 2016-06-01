@@ -1,0 +1,44 @@
+<ion-nav-bar class="bar-positive">
+	<ion-nav-buttons side="left">
+		<button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
+	</ion-nav-buttons>
+	<ion-nav-buttons side="right">
+		<a href="#/order" class="button icon-right button-icon icon ion-ios-cart-outline">${{ orderTotal | number:2 }}</a>
+	</ion-nav-buttons>
+</ion-nav-bar>
+<ion-nav-view>
+	<ion-view view-title="My order">
+		<ion-content class="has-header">
+			<div class="bar bar-header bar-calm">
+  				<h1 class="title">My order</h1>
+			</div>
+			<main class="content has-header padding">
+				<div class="card">
+				<div class="item item-divider">
+						<div class="row">
+							<div class="col-25">Quantity</div>
+							<div class="col-25">Book title</div>
+							<div class="col-25 align-right">Price</div>
+						</div>
+						</div>
+					<div class="item item-text-wrap" ng-repeat="item in lineItems">
+						<div class="row">
+							<div class="col-25">{{ item.quantity }}</div>
+							<div class="col-25">{{ item.title }}</div>
+							<div class="col-25 align-right">${{ item.price * item.quantity }}</div>
+							<div class="col-25 align-right">
+							<button class="button button-assertive button-small icon ion-ios-compose-outline" ng-click="showPopup(id)"></button>
+							<button class="button button-assertive button-small icon ion-ios-trash-outline" ng-click="lineItems.splice($index,1); removeLineItem(item.id)"></button>
+							</div>
+							<div class="col"></div>
+						</div>
+					</div>
+				</div>
+				<div class="card">
+				<div class="item item-divider align-right">Order total</div>
+					<div class="item item-text-wrap align-right">${{ orderTotal | number:2 }}</div>
+				</div>
+			</main>
+		</ion-content>
+	</ion-view>
+</ion-nav-view>
