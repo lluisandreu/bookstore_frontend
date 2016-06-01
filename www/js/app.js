@@ -138,9 +138,9 @@ app.controller('BookCtrl',
         }, function (errResponse) {
             console.error("Can't fetch ".backendUrl);
         });
-        $scope.addToCard = function (id, quantity) {
+        $scope.addToCard = function (id, title, quantity, price) {
             var lineItem = {
-                id, quantity
+                id, title, quantity, price
             };
             var order = webStorage.get('cart');
             order.push(lineItem);
@@ -160,53 +160,30 @@ app.controller('OrderCtrl',
         $scope.lineItems = [];
         $scope.orderTotal = 0;
         angular.forEach($scope.cart, function (element, index) {
-            $http.get(backendUrl + element.id).then(function (response) {
-                $scope.lineItems[index] = response.data[0];
-                $scope.lineItems[index].quantity = element.quantity;
-                $scope.orderTotal += parseFloat($scope.lineItems[index].price, 10) * parseFloat(element.quantity);
-                webStorage.set('order', $scope.orderTotal);
-            }, function (errResponse) {
-                console.error("Can't fetch ".backendUrl);
-            });
+            $scope.lineItems[index] = element;
         });
+
         $scope.removeLineItem = function (id) {
-            // Remove from webstorage
-            var cart = webStorage.get('cart');
-            var index = cart.indexOf(id);
-            cart.splice(index, 1);
-            webStorage.set('cart', cart);
 
             // Remove from view
             var indexTwo = $scope.lineItems.indexOf(id);
             $scope.lineItems.splice(indexTwo, 1);
-        }
-        $scope.showPopup = function (id) {
-            $scope.data = {};
 
-            // An elaborate, custom popup
-            var changeQuantity = $ionicPopup.show({
-                template: '<input type="number" ng-model="changeQuantity">',
-                title: 'Change your item quantity',
-                scope: $scope,
-                buttons: [{
-                    text: 'Cancel'
-                }, {
-                    text: '<b>Save</b>',
-                    type: 'button-positive',
-                    onTap: function (e) {
-                        if (!$scope.changeQuantity) {
-                            //don't allow the user to close unless he enters wifi password
-                            e.preventDefault();
-                        } else {
-                            return $scope.changeQuantity;
-                        }
-                    }
-                }]
+            webStorage.set('cart', $scope.lineItems);
+        }
+
+        $scope.addQuantity = function (id) {
+
+        }
+
+        $scope.orderTotal = function () {
+            var total = 0;
+            angular.forEach($scope.lineItems, function (element, index) {
+                total += Number(($scope.lineItems[index].price) * ($scope.lineItems[index].quantity));
             });
-            changeQuantity.then(function (res) {
-                console.log(res);
-            });
-        };
+            webStorage.set('order', total);
+            return total;
+        }
     }
 );
 

@@ -41,7 +41,7 @@
 				    </select>
 				  </label>
 				</div>
-			    <a ng-click="addToCard(book.id, quantity)" class="button button-outline icon-left ion-ios-cart-outline button-balanced">Add to the cart</a>
+			    <a ng-click="addToCard(book.id, book.title, quantity, book.price)" class="button button-outline icon-left ion-ios-cart-outline button-balanced">Add to the cart</a>
 			    <div ng-bind-html="book.review"></div>
 			    <br>
 			    <div class="book-isbn"><span>ISBN: </span> {{ book.ISBN }}</div>
