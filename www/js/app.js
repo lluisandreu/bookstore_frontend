@@ -38,7 +38,7 @@ app.config(function ($stateProvider, $urlRouterProvider) {
         .state('books', {
             url: '/books',
             templateUrl: 'templates/books.html',
-            controller: 'MainCtrl'
+            controller: 'BooksCtrl'
         })
         .state('book', {
             url: '/book/:bookId',
@@ -60,9 +60,26 @@ app.service('backendUrl', function () {
     }
 });
 
+app.controller('MainCtrl', function ($scope, webStorage, $ionicSideMenuDelegate, $ionicLoading) {
+    $ionicLoading.show();
+    $scope.user = webStorage.get('username');
+    $scope.orderTotal = webStorage.get('order');
+    $scope.cart = webStorage.get('cart');
+    $ionicLoading.hide();
+
+    $scope.logOut = function () {
+        webStorage.remove('login');
+    }
+
+    $scope.toggleLeft = function () {
+        $ionicSideMenuDelegate.toggleLeft();
+    };
+
+});
+
 app.controller('LoginCtrl',
 
-    function ($ionicSideMenuDelegate, $scope, $http, $state, webStorage) {
+    function ($ionicSideMenuDelegate, $scope, $http, $state, webStorage, $ionicLoading) {
         var logged = webStorage.get('login');
         if (logged == "logged") {
             $state.go("home");
@@ -84,61 +101,73 @@ app.controller('LoginCtrl',
                         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
                     }
                 }
+                $ionicLoading.show();
                 $http.post(loginUrl, $scope.user, config).then(
                     function (resp) {
-                        console.log(resp.data);
                         $scope.status = resp.data.status;
                         if ($scope.status == 'OK') {
-                            webStorage.set('username', data.user);
+                            $ionicLoading.hide();
                             webStorage.set('login', 'logged');
-                            webStorage.set('cart', cart);
-                            webStorage.set('order', order);
+                            if (!webStorage.has('username')) {
+                                webStorage.set('username', data.user);
+                            }
+                            if (!webStorage.has('cart')) {
+                                webStorage.set('cart', cart);
+                            }
+                            if (!webStorage.has('order')) {
+                                webStorage.set('order', order);
+                            }
+
                             $state.go("home");
                         } else {
+                            $ionicLoading.hide();
                             $scope.message.login = "Your login failed. Please try again";
                         }
                     });
-                console.log($scope.user);
             }
         }
     }
+);
 
+app.controller('BooksCtrl',
 
-)
-
-app.controller('MainCtrl',
-
-    function ($ionicSideMenuDelegate, $http, $scope, webStorage, backendUrl) {
+    function ($ionicSideMenuDelegate, $http, $scope, webStorage, backendUrl, $ionicLoading) {
+        $ionicLoading.show();
         var backendUrl = backendUrl.url();
         $ionicSideMenuDelegate.canDragContent(true);
         $scope.books = {};
         $scope.user = webStorage.get('username');
         $http.get(backendUrl + 'all').then(function (response) {
             $scope.books = response.data;
-            console.log(response.data);
+            $ionicLoading.hide();
         }, function (errResponse) {
             console.error("Can't fetch ".backendUrl);
+            $ionicLoading.hide();
         });
         $scope.logout = function () {
-            webStorage.clear('login');
+            webStorage.remove('login');
         }
     }
 );
 
 app.controller('BookCtrl',
 
-    function ($ionicSideMenuDelegate, $stateParams, $http, $scope, webStorage, backendUrl) {
+    function ($ionicSideMenuDelegate, $stateParams, $http, $scope, webStorage, backendUrl, $ionicLoading, $ionicPopover) {
+        $ionicLoading.show();
         $ionicSideMenuDelegate.canDragContent(true);
         var backendUrl = backendUrl.url();
         var bookId = $stateParams.bookId;
-        $scope.message = {};
+        $scope.orderTodal =
+            $scope.message = {};
         $http.get(backendUrl + bookId).then(function (response) {
             $scope.books = response.data;
-            console.log($scope.books);
+            $ionicLoading.hide();
         }, function (errResponse) {
             console.error("Can't fetch ".backendUrl);
         });
+
         $scope.addToCard = function (id, title, quantity, price) {
+            $ionicLoading.show();
             var lineItem = {
                 id, title, quantity, price
             };
@@ -146,49 +175,63 @@ app.controller('BookCtrl',
             order.push(lineItem);
             webStorage.set('cart', order);
             $scope.message.cart = "This book was added to your cart";
+            $ionicLoading.hide();
+
         }
-        console.log(webStorage.get('cart'));
+
     }
 );
 
 app.controller('OrderCtrl',
 
-    function (backendUrl, $ionicSideMenuDelegate, $stateParams, $http, $scope, $ionicPopup, webStorage) {
+    function (backendUrl, $ionicSideMenuDelegate, $stateParams, $http, $scope, $ionicPopup, webStorage, $ionicLoading) {
+        $ionicLoading.show();
         $ionicSideMenuDelegate.canDragContent(true);
         var backendUrl = backendUrl.url();
         $scope.cart = webStorage.get('cart');
         $scope.lineItems = [];
-        $scope.orderTotal = 0;
         angular.forEach($scope.cart, function (element, index) {
             $scope.lineItems[index] = element;
         });
+        $ionicLoading.hide();
 
         $scope.removeLineItem = function (id) {
-
+            $ionicLoading.show();
             // Remove from view
             var indexTwo = $scope.lineItems.indexOf(id);
             $scope.lineItems.splice(indexTwo, 1);
 
             webStorage.set('cart', $scope.lineItems);
+            $ionicLoading.hide();
         }
 
         $scope.addQuantity = function (id) {
+            $ionicLoading.show();
+            $scope.lineItems[id].quantity = parseInt($scope.lineItems[id].quantity) + 1;
+            webStorage.set('cart', $scope.lineItems);
+            $ionicLoading.hide();
+            angular.forEach($scope.lineItems, function (element, index) {
+                total += Number(($scope.lineItems[index].price) * ($scope.lineItems[index].quantity));
+            });
 
+        }
+
+        $scope.removeQuantity = function (id) {
+            $ionicLoading.show();
+            $scope.lineItems[id].quantity = $scope.lineItems[id].quantity - 1;
+            webStorage.set('cart', $scope.lineItems);
+            $ionicLoading.hide();
+            angular.forEach($scope.lineItems, function (element, index) {
+                total += Number(($scope.lineItems[index].price) * ($scope.lineItems[index].quantity));
+            });
         }
 
         $scope.orderTotal = function () {
             var total = 0;
             angular.forEach($scope.lineItems, function (element, index) {
-                total += Number(($scope.lineItems[index].price) * ($scope.lineItems[index].quantity));
+                total += (Number(($scope.lineItems[index].price) * ($scope.lineItems[index].quantity)));
             });
             webStorage.set('order', total);
             return total;
         }
-    }
-);
-
-function ContentController($scope, $ionicSideMenuDelegate) {
-    $scope.toggleLeft = function () {
-        $ionicSideMenuDelegate.toggleLeft();
-    };
-}
+    });

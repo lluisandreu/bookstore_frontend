@@ -2,6 +2,10 @@
 	<ion-nav-buttons side="left">
 		<button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
 	</ion-nav-buttons>
+	<ion-nav-title>Books</ion-nav-title>
+	<ion-nav-buttons side="right">
+		<a href="#/order" class="button icon-right button-icon icon ion-ios-cart-outline"></a>
+	</ion-nav-buttons>
 </ion-nav-bar>
 <ion-nav-view>
 	<ion-view view-title="Books">
@@ -10,25 +14,25 @@
   				<h1 class="title">About this book</h1>
 			</div>
 			<main class="content has-header padding">
-			<div class="alerts">
-				<p ng-bind="message.cart" class="balanced"></p>
+			<div class="alerts" ng-if="message.cart">
+				<p ng-bind="message.cart"></p>
 			</div>
 			<div ng-repeat="book in books" class="list card">
 
-			  <div class="item">
+			  <div class="item item-text-wrap">
 			  	<div class="row">
 				  	<div class="col">
 					    <h2>{{ book.title }}</h2>
 					    <p>{{ book.author }}</p>
 				    </div>
 				    <div class="col">
-			    		<p class="price align-right"><span class="inner">${{ book.price }}</span></p>
+			    		<p class="price align-right"><span class="inner">{{ book.price | currency }}</span></p>
 			    	</div>
 			    </div>
 			  </div>
 
 			  <div class="item item-body">
-			    <div class="list">
+			    <div class="list book-select">
 				  <label class="item-input item-select">
 				    <div class="input-label">Quantity</div>
 				    <select ng-model="quantity" ng-init="quantity='1'">
@@ -47,7 +51,7 @@
 			    <div class="book-isbn"><span>ISBN: </span> {{ book.ISBN }}</div>
 			  </div>
 
-			</div>
+			</div>			
 			</main>
 		</ion-content>
 	</ion-view>

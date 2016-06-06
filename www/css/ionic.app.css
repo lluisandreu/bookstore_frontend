@@ -9823,8 +9823,21 @@ a.button {
   color: #fff;
   display: inline-block; }
 
+.alerts {
+  background: #33cd5f;
+  padding: 1em;
+  color: #fff; }
+  .alerts p {
+    margin: 0; }
+
+.book-select {
+  background: #f7f7f7; }
+
 .padding-extra {
   padding: 2em 1.5em; }
 
 .align-right {
   text-align: right; }
+
+.pull-right {
+  float: right; }

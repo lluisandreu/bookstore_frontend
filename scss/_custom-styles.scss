@@ -9,6 +9,20 @@
     display: inline-block;
 }
 
+.alerts {
+    background: $balanced;
+    padding: 1em;
+    color: #fff;
+
+    p {
+        margin: 0;
+    }
+}
+
+.book-select {
+    background: #f7f7f7;
+}
+
 // Utility
 
 .padding-extra {
@@ -17,4 +31,8 @@
 
 .align-right {
     text-align: right;
+}
+
+.pull-right {
+    float: right;
 }
