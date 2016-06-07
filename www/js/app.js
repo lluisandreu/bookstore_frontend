@@ -60,11 +60,42 @@ app.service('backendUrl', function () {
     }
 });
 
-app.controller('MainCtrl', function ($scope, webStorage, $ionicSideMenuDelegate, $ionicLoading) {
+app.factory('getQuantity', function () {
+    return {
+        getQuantity: function (items) {
+            var quantity = 0;
+            angular.forEach(items, function (element, index) {
+                quantity += parseInt(element.quantity);
+            });
+            return quantity;
+        }
+    }
+});
+
+app.filter('getById', function () {
+    return function (input, id) {
+        var i = 0,
+            len = input.length;
+        for (; i < len; i++) {
+            if (+input[i].id == +id) {
+                return i;
+            }
+        }
+        return null;
+    }
+});
+
+app.controller('MainCtrl', function ($scope, webStorage, $ionicSideMenuDelegate, $ionicLoading, getQuantity) {
     $ionicLoading.show();
     $scope.user = webStorage.get('username');
-    $scope.orderTotal = webStorage.get('order');
-    $scope.cart = webStorage.get('cart');
+    var cart = webStorage.get('cart');
+    if (cart) {
+        $scope.orderTotal = cart.total;
+        $scope.quantity = getQuantity.getQuantity(cart.lineItems);
+    } else {
+        $scope.orderTotal = 0;
+    }
+
     $ionicLoading.hide();
 
     $scope.logOut = function () {
@@ -112,12 +143,13 @@ app.controller('LoginCtrl',
                                 webStorage.set('username', data.user);
                             }
                             if (!webStorage.has('cart')) {
+                                cart = {
+                                    user: data.user
+                                };
+                                cart.lineItems = [];
+                                cart.total = 0;
                                 webStorage.set('cart', cart);
                             }
-                            if (!webStorage.has('order')) {
-                                webStorage.set('order', order);
-                            }
-
                             $state.go("home");
                         } else {
                             $ionicLoading.hide();
@@ -152,7 +184,7 @@ app.controller('BooksCtrl',
 
 app.controller('BookCtrl',
 
-    function ($ionicSideMenuDelegate, $stateParams, $http, $scope, webStorage, backendUrl, $ionicLoading, $ionicPopover) {
+    function ($ionicSideMenuDelegate, $stateParams, $http, $scope, webStorage, backendUrl, $ionicLoading, $ionicPopover, $filter, getQuantity) {
         $ionicLoading.show();
         $ionicSideMenuDelegate.canDragContent(true);
         var backendUrl = backendUrl.url();
@@ -172,58 +204,87 @@ app.controller('BookCtrl',
                 id, title, quantity, price
             };
             var order = webStorage.get('cart');
-            order.push(lineItem);
+            var found = $filter('getById')(order.lineItems, id);
+            if (found != null) {
+                order.lineItems[found].quantity = parseInt(order.lineItems[found].quantity) + parseInt(lineItem.quantity);
+            } else {
+                order.lineItems.push(lineItem);
+            }
+
+            var total = 0;
+            angular.forEach(order.lineItems, function (element, index) {
+                total += (Number((order.lineItems[index].price) * (order.lineItems[index].quantity)));
+            });
+            order.total = total;
+
+            $scope.quantity = getQuantity.getQuantity(order.lineItems);
             webStorage.set('cart', order);
             $scope.message.cart = "This book was added to your cart";
+
             $ionicLoading.hide();
-
         }
-
     }
 );
 
 app.controller('OrderCtrl',
 
-    function (backendUrl, $ionicSideMenuDelegate, $stateParams, $http, $scope, $ionicPopup, webStorage, $ionicLoading) {
+    function (backendUrl, $ionicSideMenuDelegate, $stateParams, $http, $scope, $ionicPopup, webStorage, $ionicLoading, getQuantity) {
         $ionicLoading.show();
         $ionicSideMenuDelegate.canDragContent(true);
         var backendUrl = backendUrl.url();
+        var total = 0;
         $scope.cart = webStorage.get('cart');
         $scope.lineItems = [];
-        angular.forEach($scope.cart, function (element, index) {
+
+        angular.forEach($scope.cart.lineItems, function (element, index) {
             $scope.lineItems[index] = element;
         });
+        $scope.quantity = getQuantity.getQuantity($scope.lineItems);
         $ionicLoading.hide();
 
         $scope.removeLineItem = function (id) {
             $ionicLoading.show();
             // Remove from view
-            var indexTwo = $scope.lineItems.indexOf(id);
-            $scope.lineItems.splice(indexTwo, 1);
+            var findView = $scope.lineItems.indexOf(id);
+            $scope.lineItems.splice(findView, 1);
 
-            webStorage.set('cart', $scope.lineItems);
+            var findStorage = $scope.cart.lineItems.indexOf(id);
+            $scope.cart.lineItems.splice(findStorage, 1);
+
+            angular.forEach($scope.lineItems, function (element, index) {
+                total += Number(($scope.lineItems[index].price) * ($scope.lineItems[index].quantity));
+            });
+            $scope.cart.total = total;
+            webStorage.set('cart', $scope.cart);
+            $scope.quantity = getQuantity.getQuantity($scope.lineItems);
             $ionicLoading.hide();
         }
 
         $scope.addQuantity = function (id) {
             $ionicLoading.show();
             $scope.lineItems[id].quantity = parseInt($scope.lineItems[id].quantity) + 1;
-            webStorage.set('cart', $scope.lineItems);
             $ionicLoading.hide();
             angular.forEach($scope.lineItems, function (element, index) {
                 total += Number(($scope.lineItems[index].price) * ($scope.lineItems[index].quantity));
             });
+            $scope.cart.lineItems[id].quantity = $scope.lineItems[id].quantity;
+            $scope.cart.total = total;
+            $scope.quantity = getQuantity.getQuantity($scope.lineItems);
+            webStorage.set('cart', $scope.cart);
 
         }
 
         $scope.removeQuantity = function (id) {
             $ionicLoading.show();
             $scope.lineItems[id].quantity = $scope.lineItems[id].quantity - 1;
-            webStorage.set('cart', $scope.lineItems);
             $ionicLoading.hide();
             angular.forEach($scope.lineItems, function (element, index) {
                 total += Number(($scope.lineItems[index].price) * ($scope.lineItems[index].quantity));
             });
+            $scope.cart.lineItems[id].quantity = $scope.lineItems[id].quantity;
+            $scope.cart.total = total;
+            $scope.quantity = getQuantity.getQuantity($scope.lineItems);
+            webStorage.set('cart', $scope.cart);
         }
 
         $scope.orderTotal = function () {
@@ -231,7 +292,8 @@ app.controller('OrderCtrl',
             angular.forEach($scope.lineItems, function (element, index) {
                 total += (Number(($scope.lineItems[index].price) * ($scope.lineItems[index].quantity)));
             });
-            webStorage.set('order', total);
+            $scope.cart.total = total;
+            webStorage.set('cart', $scope.cart);
             return total;
         }
     });

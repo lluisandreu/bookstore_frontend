@@ -4,7 +4,9 @@
 	</ion-nav-buttons>
 	<ion-nav-title>My shopping cart</ion-nav-title>
 	<ion-nav-buttons side="right">
-		<a href="#/order" class="button icon-right button-icon icon ion-ios-cart-outline"></a>
+		<a href="#/order" class="button icon-right button-icon icon ion-ios-cart-outline">
+			<i ng-if="quantity > 0">({{ quantity | number }})</i>
+		</a>
 	</ion-nav-buttons>
 </ion-nav-bar>
 <ion-nav-view>

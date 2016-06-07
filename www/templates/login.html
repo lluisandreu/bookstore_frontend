@@ -3,7 +3,7 @@
 	<h1>Welcome to myBooks</h1>
 	<p>Please login to continue</p>
 	<form name="loginForm">
-		<div class="alerts">
+		<div class="alerts" ng-if="message.login">
 			<p ng-bind="message.login"></p>
 		</div>
 		<div class="list list-inset">
