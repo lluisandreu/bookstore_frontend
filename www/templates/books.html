@@ -15,10 +15,17 @@
 			<main class="content padding">
 				<div class="card">
 					<div class="item">Showing {{ books.length }} books</div>
+					<label class="item-input item-select">
+				    <div class="input-label">Sort by price</div>
+				    <select ng-model="sort.price" ng-init="sort.price='reverse'">
+				      <option value="" selected>desc</option>
+				      <option value="reverse">asc</option>
+				    </select>
+				  </label>
 				</div>
 				<div class="list">
-				    <a ng-repeat="book in books | orderBy : 'title' " class="item item-thumbnail-left book-{{ book.id }}" href="#/book/{{book.id}}">
-				      <img ng-src="{{ book.cover.thumb }}">
+				    <a ng-repeat="book in books | orderBy : '-price':sort.price " class="item item-thumbnail-left book-{{ book.id }}" href="#/book/{{book.id}}">
+				      <img ng-src="{{ book.cover.thumb }}" alt="{{ book.title }}">
 				      <h2 ng-bind="book.title"></h2>
 				      <p>{{ book.price | currency }}</p>
 				    </a>

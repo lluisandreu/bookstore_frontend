@@ -184,7 +184,7 @@ app.controller('BooksCtrl',
 
 app.controller('BookCtrl',
 
-    function ($ionicSideMenuDelegate, $stateParams, $http, $scope, webStorage, backendUrl, $ionicLoading, $ionicPopover, $filter, getQuantity) {
+    function ($ionicSideMenuDelegate, $stateParams, $http, $scope, webStorage, backendUrl, $ionicLoading, $ionicPopup, $filter, $state, getQuantity) {
         $ionicLoading.show();
         $ionicSideMenuDelegate.canDragContent(true);
         var backendUrl = backendUrl.url();
@@ -205,12 +205,13 @@ app.controller('BookCtrl',
             };
             var order = webStorage.get('cart');
             var found = $filter('getById')(order.lineItems, id);
+
             if (found != null) {
                 order.lineItems[found].quantity = parseInt(order.lineItems[found].quantity) + parseInt(lineItem.quantity);
             } else {
                 order.lineItems.push(lineItem);
             }
-
+            console.log(order);
             var total = 0;
             angular.forEach(order.lineItems, function (element, index) {
                 total += (Number((order.lineItems[index].price) * (order.lineItems[index].quantity)));
@@ -219,10 +220,30 @@ app.controller('BookCtrl',
 
             $scope.quantity = getQuantity.getQuantity(order.lineItems);
             webStorage.set('cart', order);
-            $scope.message.cart = "This book was added to your cart";
-
             $ionicLoading.hide();
         }
+
+        $scope.cartAlert = function (lineItem) {
+            var alertPopup = $ionicPopup.alert({
+                title: lineItem.title + ' was added to the cart!',
+                buttons: [{ // Array[Object] (optional). Buttons to place in the popup footer.
+                    text: 'Go to checkout',
+                    type: 'button-balanced',
+                    onTap: function (e) {
+                        $state.go('order');
+                        alertPopup.close();
+                        e.preventDefault();
+                    }
+                }, {
+                    text: 'OK',
+                    type: 'button-positive',
+                    onTap: function (e) {
+                        // Returning a value will cause the promise to resolve with the given value.
+                        alertPopup.close();
+                    }
+                }]
+            });
+        };
     }
 );
 
