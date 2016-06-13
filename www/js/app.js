@@ -201,7 +201,10 @@ app.controller('BookCtrl',
         $scope.addToCard = function (id, title, quantity, price) {
             $ionicLoading.show();
             var lineItem = {
-                id, title, quantity, price
+                id: id,
+                title: title,
+                quantity: quantity,
+                price: price,
             };
             var order = webStorage.get('cart');
             var found = $filter('getById')(order.lineItems, id);
